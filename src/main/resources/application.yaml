@@ -27,12 +27,3 @@ logging:
     root: INFO
     kr.co.pincoin: DEBUG
     org.hibernate.SQL: DEBUG
-
-
-async:
-  config:
-    core-pool-size: 5
-    max-pool-size: 10
-    queue-capacity: 25
-    thread-name-prefix: AsyncThread-
-    await-termination-seconds: 60

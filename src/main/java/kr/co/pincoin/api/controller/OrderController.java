@@ -15,6 +15,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 주문 처리를 위한 REST 컨트롤러
+ * 두 가지 다른 아키텍처 패턴(퍼사드와 트랜잭션 스크립트)을 통한 주문 처리를 비교 제공
+ *
+ * 두 패턴의 주요 차이점:
+ *
+ * 1. 코드 구조
+ *    - 트랜잭션 스크립트: 모든 로직이 한 클래스에 집중
+ *    - 퍼사드: 각 책임이 별도 서비스로 분리
+ *
+ * 2. 유지보수성
+ *    - 트랜잭션 스크립트: 간단한 로직에 적합, 복잡해지면 유지보수 어려움
+ *    - 퍼사드: 책임 분리로 유지보수 용이
+ *
+ * 3. 테스트 용이성
+ *    - 트랜잭션 스크립트: 통합 테스트 위주
+ *    - 퍼사드: 단위 테스트 용이
+ *
+ * 4. 확장성
+ *    - 트랜잭션 스크립트: 확장이 어려움
+ *    - 퍼사드: 새로운 기능 추가가 용이
+ */
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -23,6 +45,16 @@ public class OrderController {
     private final OrderFacade orderFacade;
     private final OrderProcessingService orderProcessingService;
 
+    /**
+     * 퍼사드 패턴을 사용한 주문 처리 엔드포인트
+     * 퍼사드 패턴의 특징:
+     * - 복잡한 시스템을 단순화된 인터페이스로 제공
+     * - 각 서비스가 독립적인 책임을 가짐 (SRP 원칙)
+     * - 높은 응집도, 낮은 결합도
+     *
+     * @param request 주문 요청 데이터
+     * @return 처리 결과 응답
+     */
     @PostMapping("/facade")
     public ResponseEntity<String> processOrderFacade(@RequestBody OrderRequest request) {
         try {
@@ -34,6 +66,16 @@ public class OrderController {
         }
     }
 
+    /**
+     * 트랜잭션 스크립트 패턴을 사용한 주문 처리 엔드포인트
+     * 트랜잭션 스크립트 패턴의 특징:
+     * - 절차적인 코드로 비즈니스 로직을 직접 구현
+     * - 단순한 CRUD 작업에 적합
+     * - 모든 로직이 하나의 서비스 클래스에 집중
+     *
+     * @param request 주문 요청 데이터
+     * @return 처리 결과 응답
+     */
     @PostMapping("/transaction-script")
     public ResponseEntity<String> processOrderTransactionScript(@RequestBody OrderRequest request) {
         try {
