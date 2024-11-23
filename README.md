@@ -1,13 +1,40 @@
 # 목표
 스프링부트 자바 기반 프로젝트 서비스 계층에 트랜잭션 스크립트 패턴과 퍼사드 패턴의 적용
 
+# curl 테스트
+
+트랜잭션 스크립트 패턴
+
+```
+curl -X POST http://localhost:8080/orders/transaction-script \
+-H "Content-Type: application/json" \
+-d '{
+    "orderId": "ORD-001",
+    "amount": 100.00,
+    "customerEmail": "test@example.com"
+}'
+```
+
+퍼사드 패턴
+
+```
+curl -X POST http://localhost:8080/orders/facade \
+-H "Content-Type: application/json" \
+-d '{
+    "orderId": "ORD-001",
+    "amount": 100.00,
+    "customerEmail": "test@example.com"
+}'
+```
+
 # 수행 작업 및 요건
 
 ## 작업 수행 순서
-- DB 트랜잭션 수행(1)
-- 비동기 외부 API 1 호출 (DB 트랜잭션 로깅 포함)
-- 비동기 외부 API 호출결과를 가지고 DB 트랜잭션 수행(2)
-- 비동기 외부 API 2 호출 (통보 등 DB 트랜잭션 로깅 포함)
+
+1. DB 트랜잭션 수행(1)
+2. 비동기 외부 API 1 호출 (DB 트랜잭션 로깅 포함)
+3. 비동기 외부 API 호출결과를 가지고 DB 트랜잭션 수행(2)
+4. 비동기 외부 API 2 호출 (통보 등 DB 트랜잭션 로깅 포함)
 
 ## 주요 특징
 - 1~4번은 하나의 원자적 동작
@@ -46,7 +73,7 @@
 
 ## 처리 단계
 - 주문 정보 DB 저장
-- 첫 번째 외부 API 호출 (+ 로깅)
+- 결제 API 호출 (+ 로깅)
 - 결제 정보 DB 저장
 - 알림용 외부 API 호출 (+ 로깅)
 
@@ -74,8 +101,8 @@
 
 ## 비동기 처리
 - 외부 API 호출은 모두 비동기(`CompletableFuture`) 사용
-- 첫 번째 API는 응답 대기 필요(`get()` 메소드 사용)
-- 두 번째 API는 응답 대기 없이 실행(`runAsync`)
+- 결제 API는 응답 대기 필요(`get()` 메소드 사용)
+- 통보 API는 응답 대기 없이 실행(`runAsync`)
 
 ## 트랜잭션 로깅
 - 모든 외부 API 호출은 트랜잭션 로거로 기록
@@ -86,3 +113,34 @@
 - 각 Phase별 적절한 예외 타입 사용
 - 보상 트랜잭션 실패 시에도 메인 플로우 롤백 보장
 - 최상위에서 모든 예외를 `OrderProcessingException`으로 래핑
+
+# 소스코드 바로가기
+
+## 서비스
+
+- [트랜잭션 스크립트 패턴 서비스](/src/main/java/kr/co/pincoin/api/service/OrderProcessingService.java)
+- [퍼사드 패턴 서비스](/src/main/java/kr/co/pincoin/api/service/OrderFacade.java)
+  - [OrderService](/src/main/java/kr/co/pincoin/api/service/OrderService.java)
+  - [ExternalAPIService](/src/main/java/kr/co/pincoin/api/service/ExternalAPIService.java)
+  - [PaymentService](/src/main/java/kr/co/pincoin/api/service/PaymentService.java)
+  - [NotificationService](/src/main/java/kr/co/pincoin/api/service/NotificationService.java)
+
+# 외부 연동 API 인터페이스와 더미 구현체
+
+- [ExternalAPIClient](/src/main/java/kr/co/pincoin/api/external/ExternalAPIClient.java)
+- [NotificationAPIClient](/src/main/java/kr/co/pincoin/api/external/NotificationAPIClient.java)
+- [DummyExternalAPIClient](/src/main/java/kr/co/pincoin/api/external/DummyExternalAPIClient.java)
+- [DummyNotificationAPIClient](/src/main/java/kr/co/pincoin/api/external/DummyNotificationAPIClient.java)
+
+# 트랜잭션 로거
+
+- [TransactionLogger](/src/main/java/kr/co/pincoin/api/logger/TransactionLogger.java)
+
+# 비동기 설정
+
+- [AsyncConfig](/src/main/java/kr/co/pincoin/api/config/AsyncConfig.java)
+
+## JPA 리파지토리
+
+- [잔액 리파지토리](/src/main/java/kr/co/pincoin/jpa/repository/BalanceRepository.java)
+- [거래 리파지토리](/src/main/java/kr/co/pincoin/jpa/repository/TransactionRepository.java)
