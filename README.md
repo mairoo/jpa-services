@@ -125,22 +125,17 @@ curl -X POST http://localhost:8080/orders/facade \
   - [PaymentService](/src/main/java/kr/co/pincoin/api/service/PaymentService.java)
   - [NotificationService](/src/main/java/kr/co/pincoin/api/service/NotificationService.java)
 
-# 외부 연동 API 인터페이스와 더미 구현체
+## 외부 연동 API 인터페이스와 더미 구현체
 
 - [ExternalAPIClient](/src/main/java/kr/co/pincoin/api/external/ExternalAPIClient.java)
 - [NotificationAPIClient](/src/main/java/kr/co/pincoin/api/external/NotificationAPIClient.java)
 - [DummyExternalAPIClient](/src/main/java/kr/co/pincoin/api/external/DummyExternalAPIClient.java)
 - [DummyNotificationAPIClient](/src/main/java/kr/co/pincoin/api/external/DummyNotificationAPIClient.java)
 
-# 트랜잭션 로거
+## 트랜잭션 로거
 
 - [TransactionLogger](/src/main/java/kr/co/pincoin/api/logger/TransactionLogger.java)
 
-# 비동기 설정
+## 비동기 설정
 
 - [AsyncConfig](/src/main/java/kr/co/pincoin/api/config/AsyncConfig.java)
-
-## JPA 리파지토리
-
-- [잔액 리파지토리](/src/main/java/kr/co/pincoin/jpa/repository/BalanceRepository.java)
-- [거래 리파지토리](/src/main/java/kr/co/pincoin/jpa/repository/TransactionRepository.java)
